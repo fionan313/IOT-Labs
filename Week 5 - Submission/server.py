@@ -1,4 +1,12 @@
+"""
+Group 04
+- Fionán Ó Ceallaigh
+- Loredana Bura
+- Niamh Armour
+"""
+
 import socket
+
 from Crypto.Cipher import AES
 
 port_number_pc = 8000

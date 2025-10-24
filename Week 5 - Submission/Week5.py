@@ -1,3 +1,10 @@
+"""
+Group 04
+- Fionán Ó Ceallaigh
+- Loredana Bura
+- Niamh Armour
+"""
+
 #imports
 from network import WLAN  
 import time               
