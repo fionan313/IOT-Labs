@@ -12,8 +12,8 @@ wifi = WLAN(WLAN.IF_STA)
 wifi.active(True)
 
 # WiFi credentials
-ssid = 'iPhone :)'
-password = 'AppleInternal2024!'
+ssid = 'REDACTED'
+password = 'REDACTED'
 
 # Connect to network
 wifi.connect(ssid, password)
@@ -24,7 +24,7 @@ wifi_status = 3
 if wifi_status != 3:
     print("Wi-Fi couldn't connect")
 else:
-    #perform DNS test
+    #DNS test
     tudublin_dns = socket.getaddrinfo("tudublin.ie", 443)
     tudublin_ip = tudublin_dns[0][-1][0]
     
@@ -77,7 +77,7 @@ else:
         led_obj.duty_u16(int(duty_cycle))
         return brightness
     
-    #temperature
+    #read temperature
     temp_sensor = ADC(4)
     
     def read_temp():
@@ -102,12 +102,12 @@ else:
 
     timer.init(freq=1, mode=machine.Timer.PERIODIC, callback=timer_callback)
     
-    # Initialise variables
+    # encryption key and IV
     iv = b'hey!'
     key = b'secret!'
     data = b'Hello, World!'
 
-    # Function to pad data to 128 bits (16 bytes)
+    # pad data to 16 bytes
     def pad_128(data):
         output = data[:]
         # Keep adding data until we reach 16 bytes
@@ -118,7 +118,7 @@ else:
         if len(output) == 16:
             return output
        
-        # Otherwise, trim to 16 bytes using modulo
+        # modulo trimming
         return output[:-(len(output) % 16)]
     
     # Pad all inputs to 128 bits (16 bytes)
@@ -135,24 +135,48 @@ else:
 
     # Display results
     print(ciphertext)
-    s.send(ciphertext)
+    
+    send data BEFORE starting HTTP server
+    print("Connecting to laptop...")
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    laptop_ip = '172.20.10.3'  
+    laptop_port = 8000
+    
+    try:
+        client_socket.connect((laptop_ip, laptop_port))
+        
+        # send encrypted data
+        client_socket.send(ciphertext)
+        time.sleep(0.5)
+        
+        # send temperature data
+        for i in range(5):
+            temperature = read_temp()
+            message = f"Temperature: {temperature:.2f}C\n"
+            client_socket.send(message.encode('utf-8'))
+            time.sleep(2)
+        
+        client_socket.close()
+        print("Finished sending data to laptop")
+    except Exception as e:
+        print(f"Failed to connect to laptop: {e}")
     
     # Main server loop
     while True:
-        # Accept incoming connection
+        # accept incoming connection
         cxn, addr = s.accept()
         print(f'Connected to {addr}')
         
-        # Receive data from client - keep receiving until we have everything
+        # Receive data from client
         data = b''
         while True:
             chunk = cxn.recv(1024)
             if not chunk:
                 break
             data += chunk
-            # Check if we have the complete request
+            # Check for complete request
             if b'\r\n\r\n' in data:
-                # For POST, check if we have the body too
+                # check for body
                 header_end = data.find(b'\r\n\r\n')
                 headers = data[:header_end].decode()
                 
@@ -189,7 +213,6 @@ else:
             
             # Handle POST requests to /rest/led
             if method == "POST" and path == "/rest/led":
-                # Find the JSON body (after \r\n\r\n)
                 body_start = data.find("\r\n\r\n")
                 if body_start != -1:
                     json_body = data[body_start + 4:]
@@ -238,7 +261,7 @@ else:
         
         json_response = f'{{"brightness": {current_brightness}, "message": "{brightness_output}", "request": "{request_value}"}}'
         
-        # Build full HTTP response
+        # full HTTP response
         response = status_line
         response += "Content-Type: application/json\r\n"
         response += f"Content-Length: {len(json_response)}\r\n"
@@ -251,20 +274,3 @@ else:
         time.sleep(0.5)
         print("Closing the connection")
         cxn.close()
-        
-        
-    # Create socket and connect to laptop
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    laptop_ip = '172.20.10.3'  
-    laptop_port = 8000
-    s.connect((laptop_ip, laptop_port))
-
-    # Read and send temperature data
-    while True:
-        read_temp()
-       
-        # Send as plaintext
-        message = f"Temperature: {temperature:.2f}C\n"
-        s.send(message.encode('utf-8'))
-       
-        time.sleep(2)  # Send every 2 seconds
