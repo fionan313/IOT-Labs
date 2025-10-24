@@ -41,16 +41,19 @@ try:
     # get first chunk
     first_chunk = conn.recv(1024)
     
+    # Check if 16 bytes received
     if len(first_chunk) == 16:
         print("Received encrypted data")
         plaintext = cipher.decrypt(first_chunk)
         print(f"Decrypted: {plaintext}")
-    
+    # receive the temperature data
     print("\nReceiving temperature data:")
     while True:
         data = conn.recv(1024)
+        # no data received - connection closed
         if not data:
             break
+        # Print the temperature
         print(data.decode('utf-8'), end='')
 
 except Exception as e:

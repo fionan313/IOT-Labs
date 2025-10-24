@@ -121,13 +121,12 @@ else:
         # modulo trimming
         return output[:-(len(output) % 16)]
     
-    # Pad all inputs to 128 bits (16 bytes)
+    # Pad all inputs 16 bytes)
     padded_key = pad_128(key)
     padded_iv = pad_128(iv)
     padded_data = pad_128(data)
 
-    # The 2 means we want to use CBC mode
-    # Create cipher object for encryption
+    # cipher object for encryption
     cipher = cryptolib.aes(padded_key, 2, padded_iv)
 
     # Encrypt the data
@@ -136,7 +135,7 @@ else:
     # Display results
     print(ciphertext)
     
-    send data BEFORE starting HTTP server
+    # send data BEFORE starting HTTP server
     print("Connecting to laptop...")
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     laptop_ip = '172.20.10.3'  
