@@ -8,13 +8,13 @@ from machine import Pin, PWM, ADC
 import json
 
 # Assuming that you connect to the internet as normal...
-print("Starting program...")
+print("Starting program")
 
 # Set up the fan on GPIO 16
 fan = Pin(16, Pin.OUT)
 fan.value(0)
 
-TEMP_THRESHOLD = 25.0  # Turn fan on above 25°C
+TEMP_THRESHOLD = 30.0  # Turn fan on above 30°C
 
 # WiFi in station mode
 wifi = WLAN(WLAN.IF_STA)
@@ -87,8 +87,15 @@ mqtt.connect()
 
 # Assuming that you have the temperature as an int or a
 # float in a variable called 'temp':
-mqtt.set_callback(callback)
-mqtt.wait_msg() # Blocking wait
-                # -- use .check_msg() for non-blocking
                 
+#timer
+timer = machine.Timer()
+timer_message = "Timer initialized"
 
+def timer_callback(t):
+    mqtt.set_callback(callback)
+    mqtt.subscribe(TOPIC)
+    mqtt.wait_msg() # Blocking wait
+                # -- use .check_msg() for non-blocking
+
+timer.init(freq=1, mode=machine.Timer.PERIODIC, callback=timer_callback)
