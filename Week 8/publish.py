@@ -70,8 +70,6 @@ def read_temp():
     
     return temperature
 
-print(f'The temperature is {read_temp()} degrees')
-
 # Assuming that you have the temperature as an int or a
 # float in a variable called 'temp':
 
@@ -82,5 +80,6 @@ timer_message = "Timer initialized"
 
 def timer_callback(t):
     mqtt.publish(TOPIC, str(read_temp()).encode())
+    print(f'The temperature is {read_temp()} degrees')
 
 timer.init(freq=1, mode=machine.Timer.PERIODIC, callback=timer_callback)
