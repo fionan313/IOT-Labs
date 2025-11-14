@@ -8,6 +8,7 @@ from machine import Pin, PWM, ADC
 import json
 
 # Assuming that you connect to the internet as normal...
+print("Starting program...")
 
 # Set up the fan on GPIO 16
 fan = Pin(16, Pin.OUT)
@@ -56,7 +57,7 @@ PORT = 8080
 TOPIC = 'temp/pico'
 
 mqtt = umqtt.MQTTClient(
-    client_id = b'publish',
+    client_id = b'subscribe',
     server = HOSTNAME.encode(),
     port = PORT,
     keepalive = 7000 # seconds

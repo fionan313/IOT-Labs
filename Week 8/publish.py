@@ -7,6 +7,8 @@ import cryptolib
 from machine import Pin, PWM, ADC
 import json
 
+print("Starting program...")
+
 # WiFi in station mode
 wifi = WLAN(WLAN.IF_STA)
 wifi.active(True)
