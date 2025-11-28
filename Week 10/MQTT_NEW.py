@@ -5,7 +5,6 @@ import socket
 import machine
 import cryptolib
 from machine import Pin, PWM, ADC, RTC
-import uprotobuf
 
 print("Starting program...")
 
@@ -47,8 +46,10 @@ def get_time_seconds():
 PORT = 8080
 
 # PUBLISHER 
-if PUB_IDENT is not None and OUTPUT_PIN is None:
+if BROKER_IP is not None and TOPIC is not None and PUB_IDENT is not None and OUTPUT_PIN is None:
     print("Running as PUBLISHER")
+    
+    from temp_schema_upb2 import TempMessage, Time
     
     mqtt = umqtt.MQTTClient(
         client_id=PUB_IDENT.encode(),
@@ -75,8 +76,6 @@ if PUB_IDENT is not None and OUTPUT_PIN is None:
     timer = machine.Timer()
     
     def timer_callback(t):
-        from temp_schema_upb2 import TempMessage, Time
-        
         dt = rtc.datetime()
         message = TempMessage()
         message.pub_id = PUB_IDENT
@@ -92,7 +91,7 @@ if PUB_IDENT is not None and OUTPUT_PIN is None:
     timer.init(freq=1, mode=machine.Timer.PERIODIC, callback=timer_callback)
 
 # SUBSCRIBER MODE
-elif OUTPUT_PIN is not None and PUB_IDENT is None:
+elif BROKER_IP is not None and TOPIC is not None and OUTPUT_PIN is not None and PUB_IDENT is None:
     print("Running as SUBSCRIBER")
     
     from temp_schema_upb2 import TempMessage, Time
