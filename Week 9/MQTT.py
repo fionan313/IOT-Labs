@@ -21,7 +21,7 @@ wifi.active(True)
 
 # WiFi credentials
 ssid = 'iPhone :)'
-password = ''
+password = 'AppleInternal2024!'
 
 # Connect to network
 wifi.connect(ssid, password)
