@@ -11,8 +11,8 @@ print("Starting program...")
 
 BROKER_IP = '172.20.10.8'
 TOPIC = 'temp/pico'
-OUTPUT_PIN = None  
-PUB_IDENT = 'pico_001'  
+OUTPUT_PIN = 16  
+PUB_IDENT = None 
 
 # WiFi in station mode
 wifi = WLAN(WLAN.IF_STA)
@@ -20,7 +20,7 @@ wifi.active(True)
 
 # WiFi credentials
 ssid = 'iPhone :)'
-password = ''
+password = 'AppleInternal2024!'
 
 # Connect to network
 wifi.connect(ssid, password)
@@ -49,7 +49,7 @@ PORT = 8080
 if BROKER_IP is not None and TOPIC is not None and PUB_IDENT is not None and OUTPUT_PIN is None:
     print("Running as PUBLISHER")
     
-    from temp_schema_upb2 import TempMessage, Time
+    from temp_schema_upb2 import TempmessageMessage, TimeMessage
     
     mqtt = umqtt.MQTTClient(
         client_id=PUB_IDENT.encode(),
@@ -77,12 +77,10 @@ if BROKER_IP is not None and TOPIC is not None and PUB_IDENT is not None and OUT
     
     def timer_callback(t):
         dt = rtc.datetime()
-        message = TempMessage()
+        message = TempmessageMessage()
         message.pub_id = PUB_IDENT
         message.temperature = read_temp()
-        message.time.hour = dt[4]
-        message.time.minute = dt[5]
-        message.time.second = dt[6]
+        message.time = time.time()
         
         payload = message.serialize()
         mqtt.publish(TOPIC, payload)
@@ -94,7 +92,7 @@ if BROKER_IP is not None and TOPIC is not None and PUB_IDENT is not None and OUT
 elif BROKER_IP is not None and TOPIC is not None and OUTPUT_PIN is not None and PUB_IDENT is None:
     print("Running as SUBSCRIBER")
     
-    from temp_schema_upb2 import TempMessage, Time
+    from temp_schema_upb2 import TempmessageMessage, TimeMessage
     
     # Set up the fan
     fan = Pin(OUTPUT_PIN, Pin.OUT)
@@ -119,12 +117,12 @@ elif BROKER_IP is not None and TOPIC is not None and OUTPUT_PIN is not None and 
         print(f'Received message')
         
         try:
-            data = TempMessage()
+            data = TempmessageMessage()
             data.parse(message)
             
             pub_id = data.pub_id._value
             temp = data.temperature._value
-            timestamp = data.time.hour._value * 3600 + data.time.minute._value * 60 + data.time.second._value
+            timestamp = data.time._value
             
             # Store data from this publisher
             publishers_data[pub_id] = {
